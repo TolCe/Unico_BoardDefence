@@ -1,7 +1,14 @@
 using UnityEngine;
 
-public class DefenceItemData
+[CreateAssetMenu(fileName = "DefenceItem_", menuName = "Defence Items/Item Data")]
+public class DefenceItemData : ScriptableObject
 {
+    [SerializeField] private int _level;
+    public int Level { get { return _level; } }
+
+    [SerializeField] private DefenceItem _prefab;
+    public DefenceItem Prefab { get { return _prefab; } }
+
     [SerializeField] private float _damage;
     public float Damage { get { return _damage; } }
 

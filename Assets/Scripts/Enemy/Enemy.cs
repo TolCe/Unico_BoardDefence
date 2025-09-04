@@ -17,11 +17,11 @@ public class Enemy : MonoBehaviour
         }
         private set
         {
-            AttachedTile?.RemoveEnemy();
+            AttachedTile?.RemoveItem();
 
             _attachedTile = value;
 
-            _attachedTile.AttachEnemy(this);
+            _attachedTile.AttachItem();
 
             SetPositionByTile(_attachedTile);
         }
@@ -61,13 +61,13 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            if (tile.AttachedEnemy != null)
+            if (tile.IsEmpty)
             {
-                Debug.Log("Enemy target tile is not empty!");
+                AttachedTile = tile;
             }
             else
             {
-                AttachedTile = tile;
+                Debug.Log("Enemy target tile is not empty!");
             }
         }
     }

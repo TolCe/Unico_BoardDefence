@@ -11,5 +11,7 @@ public class LevelLoader : MonoBehaviour
         GridController.Instance.CreateGrid(data.Rows, data.Columns);
 
         EnemySpawner.Instance.SpawnEnemies(data.EnemyDataList);
+
+        DefenceItemsListing.Instance.ListUIElements(data.DefenceItemsDataList);
     }
 }

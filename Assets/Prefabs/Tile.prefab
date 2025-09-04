@@ -100,6 +100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1547703367808192235}
   - component: {fileID: 8492526016852937251}
+  - component: {fileID: 6954240429481161939}
   m_Layer: 0
   m_Name: Tile
   m_TagString: Untagged
@@ -135,3 +136,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7fa68039a43a4c4c9dc63cd1ee442bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tile
+  _rend: {fileID: 7656716313237400606}
+  _defaultMaterial: {fileID: 2100000, guid: 9aad967dc54f7d545a0eed4a2496a389, type: 2}
+  _availableMaterial: {fileID: 2100000, guid: 6f82d66682ef38943b0b6a290820bbd1, type: 2}
+  _notAvailableMaterial: {fileID: 2100000, guid: cfde49487275e6845993620db3121eaa, type: 2}
+--- !u!65 &6954240429481161939
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6394082305550219539}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 0.1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}

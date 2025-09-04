@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GridController : SingletonMonoBehaviour<GridController>
 {
-    public Tile[,] _tiles { get; private set; }
+    public Tile[,] Tiles { get; private set; }
 
     [SerializeField] private Tile _tilePrefab;
 
@@ -14,7 +14,7 @@ public class GridController : SingletonMonoBehaviour<GridController>
 
     public void SetTileArraySize(int row, int column)
     {
-        _tiles = new Tile[row, column];
+        Tiles = new Tile[row, column];
     }
 
     public void CreateGrid(int row, int column)
@@ -29,14 +29,14 @@ public class GridController : SingletonMonoBehaviour<GridController>
 
                 Tile tile = CreateTile();
 
-                _tiles[i, j] = tile;
+                Tiles[i, j] = tile;
 
                 PlaceTile(tile, new Vector2Int(i, j), pos);
             }
         }
 
-        float tilesMidXPoint = (_tiles[_tiles.GetLength(0) - 1, _tiles.GetLength(1) - 1].transform.position.x + _tiles[0, 0].transform.position.x) * 0.5f;
-        float tilesMidZPoint = (_tiles[_tiles.GetLength(0) - 1, _tiles.GetLength(1) - 1].transform.position.z + _tiles[0, 0].transform.position.z) * 0.5f;
+        float tilesMidXPoint = (Tiles[Tiles.GetLength(0) - 1, Tiles.GetLength(1) - 1].transform.position.x + Tiles[0, 0].transform.position.x) * 0.5f;
+        float tilesMidZPoint = (Tiles[Tiles.GetLength(0) - 1, Tiles.GetLength(1) - 1].transform.position.z + Tiles[0, 0].transform.position.z) * 0.5f;
 
         CameraController.Instance.SetCameraPosition(new Vector3(tilesMidXPoint, 0, tilesMidZPoint - 4f));
     }
@@ -67,23 +67,30 @@ public class GridController : SingletonMonoBehaviour<GridController>
 
     public Tile GetTileOnCoord(int row, int column)
     {
-        if (row >= _tiles.GetLength(0) || column >= _tiles.GetLength(1))
+        if (row >= Tiles.GetLength(0) || column >= Tiles.GetLength(1))
         {
             return null;
         }
 
-        return _tiles[row, column];
+        return Tiles[row, column];
     }
 
     public Tile GetRandomTileFromFirstRow()
     {
         List<Tile> emptyTilesList = new List<Tile>();
-        for (int i = 0; i < _tiles.GetLength(1); i++)
+        for (int i = 0; i < Tiles.GetLength(1); i++)
         {
-            if (_tiles[0, i].AttachedEnemy == null)
+            if (Tiles[0, i].IsEmpty)
             {
-                emptyTilesList.Add(_tiles[0, i]);
+                emptyTilesList.Add(Tiles[0, i]);
             }
+        }
+
+        if (emptyTilesList.Count <= 0)
+        {
+            Debug.LogWarning("There is no available tile to spawn enemies!");
+
+            return null;
         }
 
         int randomIndex = UnityEngine.Random.Range(0, emptyTilesList.Count);
