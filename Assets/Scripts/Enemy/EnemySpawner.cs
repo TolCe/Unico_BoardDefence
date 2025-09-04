@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,19 +12,35 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
 
     private Dictionary<int, ObjectPool<Enemy>> _enemyPoolDictionary;
 
-    public void SpawnEnemy(LevelEnemyData enemyData, Vector2 coordinates)
+    public void SpawnEnemies(List<LevelEnemyData> enemyDataList)
     {
-        if (_enemyDatabase == null)
+        if (_enemyPoolDictionary == null)
         {
             CreatePools();
         }
 
-        EnemyData selectedEnemyData = _enemyDatabase.EnemyDataList.Find(x => x.Level == enemyData.Level);
+        StartCoroutine(SpawnCoroutine(enemyDataList));
+    }
 
-        for (int i = 0; i < enemyData.Count; i++)
+    private IEnumerator SpawnCoroutine(List<LevelEnemyData> enemyDataList)
+    {
+        foreach (LevelEnemyData enemyData in enemyDataList)
         {
+            EnemyData selectedEnemyData = _enemyDatabase.EnemyDataList.Find(x => x.Level == enemyData.Level);
 
+            for (int i = 0; i < enemyData.Count; i++)
+            {
+                Enemy enemy = _enemyPoolDictionary[selectedEnemyData.Level].Get();
+                enemy.SpawnEnemy(selectedEnemyData, GetRandomTileFromFirstRow());
+
+                yield return new WaitForSeconds(_enemySpawnInterval);
+            }
         }
+    }
+
+    private Tile GetRandomTileFromFirstRow()
+    {
+        return GridController.Instance.GetRandomTileFromFirstRow();
     }
 
     private void CreatePools()

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridController : SingletonMonoBehaviour<GridController>
@@ -30,7 +31,7 @@ public class GridController : SingletonMonoBehaviour<GridController>
 
                 _tiles[i, j] = tile;
 
-                PlaceTile(tile, pos);
+                PlaceTile(tile, new Vector2Int(i, j), pos);
             }
         }
 
@@ -55,10 +56,38 @@ public class GridController : SingletonMonoBehaviour<GridController>
         _tilesPool = new ObjectPool<Tile>(_tilePrefab, 20, _tileContainer);
     }
 
-    public void PlaceTile(Tile tile, Vector3 pos)
+    public void PlaceTile(Tile tile, Vector2Int coord, Vector3 pos)
     {
+        tile.Initialize(coord);
+
         tile.transform.position = pos;
 
         tile.gameObject.SetActive(true);
+    }
+
+    public Tile GetTileOnCoord(int row, int column)
+    {
+        if (row >= _tiles.GetLength(0) || column >= _tiles.GetLength(1))
+        {
+            return null;
+        }
+
+        return _tiles[row, column];
+    }
+
+    public Tile GetRandomTileFromFirstRow()
+    {
+        List<Tile> emptyTilesList = new List<Tile>();
+        for (int i = 0; i < _tiles.GetLength(1); i++)
+        {
+            if (_tiles[0, i].AttachedEnemy == null)
+            {
+                emptyTilesList.Add(_tiles[0, i]);
+            }
+        }
+
+        int randomIndex = UnityEngine.Random.Range(0, emptyTilesList.Count);
+
+        return emptyTilesList[randomIndex];
     }
 }

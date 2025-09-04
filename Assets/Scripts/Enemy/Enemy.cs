@@ -8,24 +8,72 @@ public class Enemy : MonoBehaviour
 
     private float _timer;
 
-    private void Update()
+    private Tile _attachedTile;
+    public Tile AttachedTile
     {
-        _timer += Time.deltaTime;
-        if (_timer >= 1f / _enemyData.Speed)
+        get
         {
-            _timer = 0f;
-            MoveDown();
+            return _attachedTile;
+        }
+        private set
+        {
+            AttachedTile?.RemoveEnemy();
+
+            _attachedTile = value;
+
+            _attachedTile.AttachEnemy(this);
+
+            SetPositionByTile(_attachedTile);
         }
     }
 
-    void MoveDown()
+    private void Update()
     {
-        _gridPosition = new Vector2Int(_gridPosition.x + 1, _gridPosition.y);
-        transform.position = GridToWorld(_gridPosition);
+        if (gameObject.activeSelf)
+        {
+            _timer += Time.deltaTime;
+            if (_timer >= 1f / _enemyData.Speed)
+            {
+                _timer = 0f;
+                MoveDown();
+            }
+        }
     }
 
-    Vector3 GridToWorld(Vector2Int gridPos)
+    public void SpawnEnemy(EnemyData data, Tile tile)
     {
-        return new Vector3(gridPos.y, -gridPos.x, 0f);
+        _enemyData = data;
+
+        _timer = 0;
+
+        gameObject.SetActive(true);
+
+        AttachedTile = tile;
+    }
+
+    private void MoveDown()
+    {
+        Tile tile = GridController.Instance.GetTileOnCoord(AttachedTile.Coord.x + 1, AttachedTile.Coord.y);
+
+        if (tile == null)
+        {
+            Debug.Log("Enemy target tile is null!");
+        }
+        else
+        {
+            if (tile.AttachedEnemy != null)
+            {
+                Debug.Log("Enemy target tile is not empty!");
+            }
+            else
+            {
+                AttachedTile = tile;
+            }
+        }
+    }
+
+    private void SetPositionByTile(Tile tile)
+    {
+        transform.position = tile.transform.position + Vector3.up;
     }
 }
