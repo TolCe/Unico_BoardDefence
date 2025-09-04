@@ -2,24 +2,26 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    public Vector2Int gridPosition; // Current row/col in the grid
-    public float moveInterval = 2f;
-    private float timer;
+    [SerializeField] private Vector2Int _gridPosition;
 
-    void Update()
+    private EnemyData _enemyData;
+
+    private float _timer;
+
+    private void Update()
     {
-        timer += Time.deltaTime;
-        if (timer >= moveInterval)
+        _timer += Time.deltaTime;
+        if (_timer >= 1f / _enemyData.Speed)
         {
-            timer = 0f;
+            _timer = 0f;
             MoveDown();
         }
     }
 
     void MoveDown()
     {
-        gridPosition = new Vector2Int(gridPosition.x + 1, gridPosition.y);
-        transform.position = GridToWorld(gridPosition);
+        _gridPosition = new Vector2Int(_gridPosition.x + 1, _gridPosition.y);
+        transform.position = GridToWorld(_gridPosition);
     }
 
     Vector3 GridToWorld(Vector2Int gridPos)

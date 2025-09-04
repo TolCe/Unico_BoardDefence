@@ -44,7 +44,7 @@ public class LevelEditorWindow : EditorWindow
             string path = EditorUtility.SaveFilePanel("Save Level", "Assets/Data/Levels", "LevelData_", "json");
             if (!string.IsNullOrEmpty(path))
             {
-                string json = JsonUtility.ToJson(_levelData, true); // pretty print
+                string json = JsonUtility.ToJson(_levelData, true);
                 System.IO.File.WriteAllText(path, json);
                 AssetDatabase.Refresh();
             }
@@ -141,21 +141,4 @@ public class LevelEditorWindow : EditorWindow
 
         EditorGUILayout.EndScrollView();
     }
-
-    //private void ResizeGrid(int newRows, int newCols)
-    //{
-    //    bool[,] newTiles = new bool[newRows, newCols];
-
-    //    for (int r = 0; r < Mathf.Min(newRows, _levelData.Rows); r++)
-    //    {
-    //        for (int c = 0; c < Mathf.Min(newCols, _levelData.Columns); c++)
-    //        {
-    //            newTiles[r, c] = _levelData.Tiles[r, c];
-    //        }
-    //    }
-
-    //    _levelData.Rows = newRows;
-    //    _levelData.Columns = newCols;
-    //    _levelData.Tiles = newTiles;
-    //}
 }
