@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DefenceItemsListing : SingletonMonoBehaviour<DefenceItemsListing>, IPooler
+public class DefenceItemsUIListing : SingletonMonoBehaviour<DefenceItemsUIListing>, IPooler
 {
     [SerializeField] private RectTransform _listingContainer;
 

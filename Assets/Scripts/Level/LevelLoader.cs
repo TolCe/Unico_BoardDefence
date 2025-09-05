@@ -25,7 +25,7 @@ public class LevelLoader : SingletonMonoBehaviour<LevelLoader>
 
         GridController.Instance.CreateGrid(data.Rows, data.Columns);
 
-        DefenceItemsListing.Instance.ListUIElements(data.DefenceItemsDataList);
+        DefenceItemsUIListing.Instance.ListUIElements(data.DefenceItemsDataList);
 
         GameManager.Instance.OnLevelLoaded();
     }

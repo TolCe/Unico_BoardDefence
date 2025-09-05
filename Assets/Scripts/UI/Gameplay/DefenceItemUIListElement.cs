@@ -56,7 +56,7 @@ public class DefenceItemUIListElement : MonoBehaviour
     {
         if (CurrentCount <= 0)
         {
-            DefenceItemsListing.Instance.ReturnToPool(this);
+            DefenceItemsUIListing.Instance.ReturnToPool(this);
         }
     }
 
