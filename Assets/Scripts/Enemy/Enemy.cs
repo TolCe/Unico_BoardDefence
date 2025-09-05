@@ -72,6 +72,8 @@ public class Enemy : PlacableItem, IDamagable
         gameObject.SetActive(true);
 
         AttachedTile = tile;
+
+        ShowHealthbar();
     }
 
     private void MoveDown()
@@ -123,11 +125,16 @@ public class Enemy : PlacableItem, IDamagable
         transform.position = tile.transform.position;
     }
 
+    private void ShowHealthbar()
+    {
+        _healthFillingImage.fillAmount = CurrentHealth / EnemyData.Health;
+    }
+
     public void TakeDamage(float damage)
     {
         CurrentHealth -= damage;
 
-        _healthFillingImage.fillAmount = CurrentHealth / EnemyData.Health;
+        ShowHealthbar();
 
         if (CurrentHealth <= 0)
         {

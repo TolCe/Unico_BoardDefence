@@ -12,6 +12,6 @@ public class SuccessScreen : InGameScreen
 
     private void NextLevel()
     {
-
+        LevelLoader.Instance.OnNextLevel();
     }
 }

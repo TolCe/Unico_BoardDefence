@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
+public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>, IPooler
 {
     [SerializeField] private EnemyDatabase _enemyDatabase;
 
@@ -19,11 +19,14 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
 
     private List<Enemy> _spawnedEnemiesList;
 
+    private bool _spawnedAll;
+
     protected override void Awake()
     {
         base.Awake();
 
         GameManager.Instance.OnGameStateChange += OnGameStateChange;
+        LevelLoader.Instance.OnReset += OnResetPool;
     }
 
     public void SetEnemyData(List<LevelEnemyData> levelEnemyDataList)
@@ -51,13 +54,15 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
     {
         if (_enemyPoolDictionary == null)
         {
-            CreatePools();
+            CreatePool();
         }
 
         if (_spawnedEnemiesList == null)
         {
             _spawnedEnemiesList = new List<Enemy>();
         }
+
+        _spawnedAll = false;
 
         _enemySpawnCoroutine = StartCoroutine(SpawnCoroutine(enemyDataList));
     }
@@ -78,6 +83,8 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
                 yield return new WaitForSeconds(_enemySpawnInterval);
             }
         }
+
+        _spawnedAll = true;
     }
 
     private Tile GetRandomTileFromFirstRow()
@@ -85,7 +92,20 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
         return GridController.Instance.GetRandomTileFromFirstRow();
     }
 
-    private void CreatePools()
+    public void OnResetPool()
+    {
+        if (_spawnedEnemiesList != null)
+        {
+            foreach (Enemy item in _spawnedEnemiesList)
+            {
+                _enemyPoolDictionary[item.EnemyData.Level].Return(item);
+            }
+
+            _spawnedEnemiesList = new List<Enemy>();
+        }
+    }
+
+    public void CreatePool()
     {
         _enemyPoolDictionary = new Dictionary<int, ObjectPool<Enemy>>();
 
@@ -110,7 +130,7 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
 
         _enemyPoolDictionary[enemy.EnemyData.Level].Return(enemy);
 
-        if (_spawnedEnemiesList.Count <= 0)
+        if (_spawnedEnemiesList.Count <= 0 && _spawnedAll)
         {
             GameManager.Instance.OnGameEnd(true);
         }

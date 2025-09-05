@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DefenceItemsListing : SingletonMonoBehaviour<DefenceItemsListing>
+public class DefenceItemsListing : SingletonMonoBehaviour<DefenceItemsListing>, IPooler
 {
     [SerializeField] private RectTransform _listingContainer;
 
@@ -10,6 +10,13 @@ public class DefenceItemsListing : SingletonMonoBehaviour<DefenceItemsListing>
     private ObjectPool<DefenceItemUIListElement> _itemsPool;
 
     [SerializeField] private DefenceItemsDatabase _itemsDatabase;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        LevelLoader.Instance.OnReset += OnResetPool;
+    }
 
     public void ListUIElements(List<LevelDefenceItemData> itemsDataList)
     {
@@ -25,7 +32,15 @@ public class DefenceItemsListing : SingletonMonoBehaviour<DefenceItemsListing>
         }
     }
 
-    private void CreatePool()
+    public void OnResetPool()
+    {
+        if (_itemsPool != null)
+        {
+            _itemsPool.ReturnAll();
+        }
+    }
+
+    public void CreatePool()
     {
         _itemsPool = new ObjectPool<DefenceItemUIListElement>(_itemUIElementPrefab, 10, _listingContainer);
     }

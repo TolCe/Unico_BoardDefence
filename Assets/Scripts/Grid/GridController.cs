@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GridController : SingletonMonoBehaviour<GridController>
+public class GridController : SingletonMonoBehaviour<GridController>, IPooler
 {
     public Tile[,] Tiles { get; private set; }
 
@@ -12,6 +12,13 @@ public class GridController : SingletonMonoBehaviour<GridController>
 
     private ObjectPool<Tile> _tilesPool;
 
+    protected override void Awake()
+    {
+        base.Awake();
+
+        LevelLoader.Instance.OnReset += OnResetPool;
+    }
+
     public void SetTileArraySize(int row, int column)
     {
         Tiles = new Tile[row, column];
@@ -19,6 +26,8 @@ public class GridController : SingletonMonoBehaviour<GridController>
 
     public void CreateGrid(int row, int column)
     {
+        _tilesPool?.ReturnAll();
+
         SetTileArraySize(row, column);
 
         for (int i = 0; i < row; i++)
@@ -51,7 +60,15 @@ public class GridController : SingletonMonoBehaviour<GridController>
         return _tilesPool.Get();
     }
 
-    private void CreatePool()
+    public void OnResetPool()
+    {
+        if (_tilesPool != null)
+        {
+            _tilesPool.ReturnAll();
+        }
+    }
+
+    public void CreatePool()
     {
         _tilesPool = new ObjectPool<Tile>(_tilePrefab, 20, _tileContainer);
     }

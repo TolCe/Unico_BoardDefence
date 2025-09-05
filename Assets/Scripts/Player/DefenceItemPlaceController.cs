@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlaceController>
+public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlaceController>, IPooler
 {
     private Dictionary<int, ObjectPool<DefenceItem>> _itemsPoolDictionary;
 
@@ -11,11 +12,24 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
 
     [SerializeField] private DefenceItemsDatabase _itemsDatabase;
 
+    private List<DefenceItem> _spawnedDefenceItemsList;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        LevelLoader.Instance.OnReset += OnResetPool;
+    }
+
     public void OnSelectedForPlacing(DefenceItemUIListElement uiItem, LevelDefenceItemData data)
     {
         if (_itemsPoolDictionary == null)
         {
-            CreatePools();
+            CreatePool();
+        }
+        if (_spawnedDefenceItemsList == null)
+        {
+            _spawnedDefenceItemsList = new List<DefenceItem>();
         }
 
         DefenceItemData itemData = _itemsDatabase.ItemDataList.Find(x => x.Level == data.Level);
@@ -23,6 +37,8 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
         DefenceItem item = _itemsPoolDictionary[itemData.Level].Get();
 
         item.Initialize(itemData);
+
+        _spawnedDefenceItemsList.Add(item);
 
         StartCoroutine(FollowWhileInput(uiItem, item));
     }
@@ -72,7 +88,20 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
         }
     }
 
-    private void CreatePools()
+    public void OnResetPool()
+    {
+        if (_spawnedDefenceItemsList != null)
+        {
+            foreach (DefenceItem item in _spawnedDefenceItemsList)
+            {
+                _itemsPoolDictionary[item.DefenceItemData.Level].Return(item);
+            }
+
+            _spawnedDefenceItemsList = new List<DefenceItem>();
+        }
+    }
+
+    public void CreatePool()
     {
         _itemsPoolDictionary = new Dictionary<int, ObjectPool<DefenceItem>>();
 

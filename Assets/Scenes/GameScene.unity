@@ -330,7 +330,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b1f122441cda0642a380921275e8525, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelLoader
-  levelFile: {fileID: 4900000, guid: ca24ae1601f6252459a518a45d45b93f, type: 3}
+  _levelDatabase: {fileID: 11400000, guid: 5b6cb31bd07390f4ab9b366558919457, type: 2}
 --- !u!1 &465196938
 GameObject:
   m_ObjectHideFlags: 0

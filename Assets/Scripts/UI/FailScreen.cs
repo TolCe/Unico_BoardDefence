@@ -13,6 +13,6 @@ public class FailScreen : InGameScreen
 
     private void RestartLevel()
     {
-
+        LevelLoader.Instance.OnLevelRestart();
     }
 }

@@ -1,0 +1,32 @@
+{
+    "Rows": 8,
+    "Columns": 4,
+    "EnemyDataList": [
+        {
+            "Level": 0,
+            "Count": 7
+        },
+        {
+            "Level": 1,
+            "Count": 3
+        },
+        {
+            "Level": 2,
+            "Count": 5
+        }
+    ],
+    "DefenceItemsDataList": [
+        {
+            "Level": 0,
+            "Count": 5
+        },
+        {
+            "Level": 1,
+            "Count": 7
+        },
+        {
+            "Level": 2,
+            "Count": 5
+        }
+    ]
+}

@@ -35,6 +35,8 @@ public class DefenceItemUIListElement : MonoBehaviour
 
         WriteAmount();
 
+        transform.SetAsLastSibling();
+
         gameObject.SetActive(true);
     }
 

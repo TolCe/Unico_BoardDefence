@@ -76,7 +76,7 @@ public class LevelEditorWindow : EditorWindow
 
         if (GUILayout.Button("Add Defence Item"))
         {
-            _levelData.DefenceItemsDataList.Add(new LevelDefenceItemData { Level = 0, Count = 1 });
+            _levelData.DefenceItemsDataList.Add(new LevelDefenceItemData { Level = _levelData.DefenceItemsDataList.Count, Count = 1 });
         }
 
         _defenceItemScroll = EditorGUILayout.BeginScrollView(_defenceItemScroll, GUILayout.Height(120));
@@ -113,7 +113,7 @@ public class LevelEditorWindow : EditorWindow
 
         if (GUILayout.Button("Add Enemy"))
         {
-            _levelData.EnemyDataList.Add(new LevelEnemyData { Level = 0, Count = 1 });
+            _levelData.EnemyDataList.Add(new LevelEnemyData { Level = _levelData.EnemyDataList.Count, Count = 1 });
         }
 
         _enemyScroll = EditorGUILayout.BeginScrollView(_enemyScroll, GUILayout.Height(120));
