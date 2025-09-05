@@ -19,8 +19,10 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
 
     private List<Enemy> _spawnedEnemiesList;
 
-    private void Start()
+    protected override void Awake()
     {
+        base.Awake();
+
         GameManager.Instance.OnGameStateChange += OnGameStateChange;
     }
 

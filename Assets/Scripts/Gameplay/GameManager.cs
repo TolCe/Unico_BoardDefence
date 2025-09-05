@@ -2,17 +2,33 @@ using System;
 
 public class GameManager : Singleton<GameManager>
 {
-    public Enums.GameState GameState { get; private set; }
+    private Enums.GameState _gameState;
+    public Enums.GameState GameState
+    {
+        get
+        {
+            return _gameState;
+        }
+        private set
+        {
+            _gameState = value;
+
+            OnGameStateChange();
+        }
+    }
 
     public Action OnGameStateChange;
+
+    public void OnLevelLoaded()
+    {
+        GameState = Enums.GameState.Start;
+    }
 
     public void StartPlaying()
     {
         if (GameState == Enums.GameState.Start)
         {
             GameState = Enums.GameState.Playing;
-
-            OnGameStateChange?.Invoke();
         }
     }
 
@@ -24,7 +40,5 @@ public class GameManager : Singleton<GameManager>
         }
 
         GameState = success ? Enums.GameState.Success : Enums.GameState.Fail;
-
-        OnGameStateChange?.Invoke();
     }
 }

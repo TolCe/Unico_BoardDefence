@@ -9,20 +9,6 @@ public class DefenceItem : PlacableItem, IDamagable
     [SerializeField] private Image _attackCountdownFillingImage;
 
     private bool _isAlive;
-    public bool IsAlive
-    {
-        get
-        {
-            return _isAlive;
-        }
-
-        private set
-        {
-            _isAlive = value;
-
-            AttachedTile?.RemoveItem();
-        }
-    }
 
     private Tile _attachedTile;
     public Tile AttachedTile
@@ -39,7 +25,7 @@ public class DefenceItem : PlacableItem, IDamagable
 
             _attachedTile.AttachItem(this);
 
-            SetPosition(_attachedTile.transform.position + 0.5f * Vector3.up);
+            SetPosition(_attachedTile.transform.position);
         }
     }
 
@@ -54,7 +40,7 @@ public class DefenceItem : PlacableItem, IDamagable
     {
         AttachedTile = tile;
 
-        IsAlive = true;
+        _isAlive = true;
 
         StartCoroutine(ShootRoutine());
     }
@@ -68,7 +54,7 @@ public class DefenceItem : PlacableItem, IDamagable
     {
         float attackTimer = 0;
 
-        while (IsAlive && GameManager.Instance.GameState == Enums.GameState.Playing)
+        while (_isAlive && GameManager.Instance.GameState == Enums.GameState.Playing)
         {
             attackTimer = 0;
 
@@ -93,7 +79,7 @@ public class DefenceItem : PlacableItem, IDamagable
                     break;
                 case Enums.DefenceItemAttackDir.Forward:
 
-                    TrySpawningOnCoord(AttachedTile.Coord.x - 1, AttachedTile.Coord.y, new Vector2Int(-1, 0));
+                    TrySpawningOnCoord(AttachedTile.Coord.x, AttachedTile.Coord.y, new Vector2Int(-1, 0));
 
                     break;
                 default:
@@ -119,7 +105,9 @@ public class DefenceItem : PlacableItem, IDamagable
 
     public void Destroy()
     {
-        IsAlive = false;
+        _isAlive = false;
+
+        AttachedTile?.RemoveItem();
 
         DefenceItemPlaceController.Instance.OnItemKilled(this);
     }

@@ -20,4 +20,12 @@ public class Enums
         Player = 1,
         Enemy = 2,
     }
+
+    public enum InGameScreenTypes
+    {
+        None = 0,
+        Start = 1,
+        Success = 2,
+        Fail = 3,
+    }
 }
