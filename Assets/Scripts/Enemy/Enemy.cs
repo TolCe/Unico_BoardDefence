@@ -1,3 +1,5 @@
+using DG.Tweening;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,21 +43,6 @@ public class Enemy : PlacableItem, IDamagable
             _attachedTile = value;
 
             _attachedTile.AttachItem(this);
-
-            SetPositionByTile(_attachedTile);
-        }
-    }
-
-    private void Update()
-    {
-        if (IsAlive && GameManager.Instance.GameState == Enums.GameState.Playing)
-        {
-            _timer += Time.deltaTime;
-            if (_timer >= 1f / EnemyData.Speed)
-            {
-                _timer = 0f;
-                MoveDown();
-            }
         }
     }
 
@@ -69,60 +56,74 @@ public class Enemy : PlacableItem, IDamagable
 
         CurrentHealth = EnemyData.Health;
 
-        gameObject.SetActive(true);
-
         AttachedTile = tile;
 
+        transform.position = AttachedTile.transform.position;
+
+        gameObject.SetActive(true);
+
         ShowHealthbar();
+
+        StartCoroutine(MoveDown());
     }
 
-    private void MoveDown()
+    private IEnumerator MoveDown()
     {
-        Tile tile = GridController.Instance.GetTileOnCoord(AttachedTile.Coord.x + 1, AttachedTile.Coord.y);
-
-        if (tile == null)
+        while (IsAlive && GameManager.Instance.GameState == Enums.GameState.Playing)
         {
-            Debug.Log("Enemy target tile is null!");
+            Tile tile = GridController.Instance.GetTileOnCoord(AttachedTile.Coord.x + 1, AttachedTile.Coord.y);
 
-            if (AttachedTile.Coord.x == GridController.Instance.Tiles.GetLength(0) - 1)
+            if (tile == null)
             {
-                Debug.Log("GAME OVER!");
+                Debug.Log("Enemy target tile is null!");
 
-                GameManager.Instance.OnGameEnd(false);
-            }
-        }
-        else
-        {
-            bool shouldMove = false;
-            if (tile.AttachedItem == null)
-            {
-                shouldMove = true;
+                if (AttachedTile.Coord.x == GridController.Instance.Tiles.GetLength(0) - 1)
+                {
+                    GameManager.Instance.OnGameEnd(false);
+                }
             }
             else
             {
-                IDamagable killable = tile.AttachedItem.GetComponent<IDamagable>();
-                if (killable != null)
+                bool shouldMove = false;
+                if (tile.AttachedItem == null)
                 {
-                    killable.TakeDamage(1);
-
                     shouldMove = true;
                 }
                 else
                 {
-                    Debug.Log("Enemy target tile is not empty!");
-                }
-            }
+                    IDamagable killable = tile.AttachedItem.GetComponent<IDamagable>();
+                    if (killable != null)
+                    {
+                        killable.TakeDamage(1);
 
-            if (shouldMove)
-            {
-                AttachedTile = tile;
+                        shouldMove = true;
+                    }
+                    else
+                    {
+                        Debug.Log("Enemy target tile is not empty!");
+                    }
+                }
+
+                if (shouldMove)
+                {
+                    AttachedTile = tile;
+
+                    yield return StartCoroutine(SetPositionByTile(_attachedTile, 1f / EnemyData.Speed));
+                }
             }
         }
     }
 
-    private void SetPositionByTile(Tile tile)
+    private IEnumerator SetPositionByTile(Tile tile, float duration = 0)
     {
-        transform.position = tile.transform.position;
+        if (duration <= 0)
+        {
+            transform.position = tile.transform.position;
+        }
+        else
+        {
+            yield return transform.DOMove(tile.transform.position, duration).WaitForCompletion();
+        }
     }
 
     private void ShowHealthbar()

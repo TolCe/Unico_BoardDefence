@@ -90,6 +90,11 @@ public class DefenceItem : PlacableItem, IDamagable
 
     private void TrySpawningOnCoord(int row, int column, Vector2Int direction)
     {
+        if (!_isAlive)
+        {
+            return;
+        }
+
         Tile tile = GridController.Instance.GetTileOnCoord(row, column);
 
         if (tile != null)
