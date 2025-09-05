@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BulletController : SingletonMonoBehaviour<BulletController>, IPooler
@@ -7,6 +8,8 @@ public class BulletController : SingletonMonoBehaviour<BulletController>, IPoole
     [SerializeField] private Transform _bulletContainer;
 
     private ObjectPool<Bullet> _bulletPool;
+
+    private List<Bullet> _spawnedBulletList = new List<Bullet>();
 
     protected override void Awake()
     {
@@ -22,16 +25,23 @@ public class BulletController : SingletonMonoBehaviour<BulletController>, IPoole
             CreatePool();
         }
 
+        if (_spawnedBulletList == null)
+        {
+            _spawnedBulletList = new List<Bullet>();
+        }
+
         Bullet bullet = _bulletPool.Get();
 
         bullet.Spawn(defenceItemData, tile, direction);
+
+        _spawnedBulletList.Add(bullet);
     }
 
     public void OnResetPool()
     {
-        if (_bulletPool != null)
+        foreach (Bullet bullet in _spawnedBulletList)
         {
-            _bulletPool.ReturnAll();
+            bullet.OnBulletDone();
         }
     }
 
@@ -42,8 +52,6 @@ public class BulletController : SingletonMonoBehaviour<BulletController>, IPoole
 
     public void OnBulletDone(Bullet bullet)
     {
-        bullet.ToggleActive(false);
-
         _bulletPool.Return(bullet);
     }
 }

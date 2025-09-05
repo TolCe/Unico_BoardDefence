@@ -1,8 +1,5 @@
 using DG.Tweening;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using static UnityEditor.PlayerSettings;
 
 public class Bullet : PlacableItem
 {
@@ -10,40 +7,52 @@ public class Bullet : PlacableItem
 
     private int _tilesMoved;
 
-    public bool Active { get; private set; }
+    private bool _isActive;
+
+    private float _timer;
 
     private Tile _attachedTile;
-    public Tile AttachedTile
-    {
-        get
-        {
-            return _attachedTile;
-        }
-        private set
-        {
-            _attachedTile = value;
-        }
-    }
 
     [SerializeField] private float _bulletMoveTimeBetweenTiles = 0.2f;
+
+    private Vector2Int _direction;
+
+    private Vector3 _lastPosition;
+
+    private void Update()
+    {
+        if (_isActive)
+        {
+            if (_timer >= _bulletMoveTimeBetweenTiles)
+            {
+                MoveInDirection();
+
+                _timer = 0f;
+            }
+
+            CheckHit();
+
+            _timer += Time.deltaTime;
+        }
+    }
 
     public void Spawn(DefenceItemData defenceItemData, Tile tile, Vector2Int direction)
     {
         _tilesMoved = 0;
+        _timer = 0f;
 
         DefenceItemData = defenceItemData;
 
-        AttachedTile = tile;
+        _direction = direction;
 
-        transform.position = _attachedTile.transform.position + direction.y * 0.5f * Vector3.right + 0.5f * Vector3.up - direction.x * 0.5f * Vector3.forward;
+        _attachedTile = tile;
+
+        SetPosition(_attachedTile.transform.position + 0.5f * Vector3.up);
 
         ToggleActive(true);
-
-        StartCoroutine(MoveRoutine(direction));
-        StartCoroutine(CheckHit(new Vector3(direction.y, 0, -direction.x)));
     }
 
-    public IEnumerator SetPosition(Vector3 pos, float duration = 0)
+    public void SetPosition(Vector3 pos, float duration = 0)
     {
         if (duration <= 0)
         {
@@ -51,70 +60,77 @@ public class Bullet : PlacableItem
         }
         else
         {
-            yield return transform.DOMove(pos, duration).WaitForCompletion();
+            transform.DOMove(pos, duration);
         }
+
+        _lastPosition = transform.position;
     }
 
-    private IEnumerator MoveRoutine(Vector2Int direction)
+    private void MoveInDirection()
     {
-        while (Active && _tilesMoved < DefenceItemData.Range)
+        if (_tilesMoved >= DefenceItemData.Range)
         {
-            yield return StartCoroutine(MoveInDirection(direction));
+            OnBulletDone();
+
+            return;
         }
 
-        BulletController.Instance.OnBulletDone(this);
-    }
-
-    private IEnumerator MoveInDirection(Vector2Int direction)
-    {
-        Tile tile = GridController.Instance.GetTileOnCoord(AttachedTile.Coord.x + direction.x, AttachedTile.Coord.y + direction.y);
+        Tile tile = GridController.Instance.GetTileOnCoord(_attachedTile.Coord.x + _direction.x, _attachedTile.Coord.y + _direction.y);
 
         bool shouldMove = false;
         if (tile != null)
         {
             shouldMove = true;
 
-            AttachedTile = tile;
+            _attachedTile = tile;
 
             _tilesMoved++;
 
-            yield return StartCoroutine(SetPosition(AttachedTile.transform.position + 0.5f * Vector3.up, 0.2f));
+            SetPosition(_attachedTile.transform.position + 0.5f * Vector3.up, _bulletMoveTimeBetweenTiles);
         }
 
         if (!shouldMove)
         {
-            BulletController.Instance.OnBulletDone(this);
+            OnBulletDone();
         }
     }
 
     public void ToggleActive(bool active)
     {
-        Active = active;
+        _isActive = active;
 
         gameObject.SetActive(active);
     }
 
-    private IEnumerator CheckHit(Vector3 direction)
+    private void CheckHit()
     {
-        while (Active)
+        Vector3 direction = (transform.position - _lastPosition).normalized;
+        float distance = Vector3.Distance(_lastPosition, transform.position);
+
+        if (Physics.Raycast(_lastPosition, direction, out RaycastHit hit, distance))
         {
-            RaycastHit hit;
-
-            Debug.DrawRay(transform.position, direction);
-
-            if (Physics.Raycast(transform.position, direction, out hit, 0.1f))
+            IDamagable damagable = hit.collider.GetComponent<IDamagable>();
+            if (damagable != null)
             {
-                IDamagable damagable = hit.collider.GetComponent<IDamagable>();
-
-                if (damagable != null)
-                {
-                    damagable.TakeDamage(DefenceItemData.Damage);
-
-                    BulletController.Instance.OnBulletDone(this);
-                }
+                damagable.TakeDamage(DefenceItemData.Damage);
+                OnBulletDone();
             }
-
-            yield return null;
         }
+
+        _lastPosition = transform.position;
+    }
+
+    public void OnBulletDone()
+    {
+        _timer = 0f;
+        _tilesMoved = 0;
+
+        transform.DOKill();
+
+        ToggleActive(false);
+
+        _attachedTile = null;
+
+        BulletController.Instance.OnBulletDone(this);
     }
 }

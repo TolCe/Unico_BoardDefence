@@ -17,7 +17,7 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>, IPooler
 
     private List<LevelEnemyData> _levelEnemyDataList;
 
-    private List<Enemy> _spawnedEnemiesList;
+    private List<Enemy> _spawnedEnemiesList = new List<Enemy>();
 
     private bool _spawnedAll;
 
@@ -98,7 +98,7 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>, IPooler
         {
             foreach (Enemy item in _spawnedEnemiesList)
             {
-                _enemyPoolDictionary[item.EnemyData.Level].Return(item);
+                item.Destroy();
             }
 
             _spawnedEnemiesList = new List<Enemy>();

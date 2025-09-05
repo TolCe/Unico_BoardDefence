@@ -1,5 +1,4 @@
 using DG.Tweening;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,122 +6,99 @@ public class Enemy : PlacableItem, IDamagable
 {
     public EnemyData EnemyData { get; private set; }
 
-    private float _timer;
-
     [SerializeField] private Image _healthFillingImage;
+
+    private float _timer;
 
     public float CurrentHealth { get; private set; }
 
-    private bool _isAlive;
-    public bool IsAlive
-    {
-        get
-        {
-            return _isAlive;
-        }
-
-        private set
-        {
-            _isAlive = value;
-
-            AttachedTile?.RemoveItem();
-        }
-    }
-
     private Tile _attachedTile;
-    public Tile AttachedTile
+
+    private void Update()
     {
-        get
+        if (_timer >= 1f / EnemyData.Speed)
         {
-            return _attachedTile;
-        }
-        private set
-        {
-            AttachedTile?.RemoveItem();
+            MoveDown();
 
-            _attachedTile = value;
-
-            _attachedTile.AttachItem(this);
+            _timer = 0f;
         }
+
+        _timer += Time.deltaTime;
     }
 
     public void SpawnEnemy(EnemyData data, Tile tile)
     {
-        EnemyData = data;
-
         _timer = 0;
 
-        IsAlive = true;
+        EnemyData = data;
 
         CurrentHealth = EnemyData.Health;
 
-        AttachedTile = tile;
+        _attachedTile = tile;
+        _attachedTile.AttachItem(this);
 
-        transform.position = AttachedTile.transform.position;
+        SetPosition(_attachedTile);
 
         gameObject.SetActive(true);
 
         ShowHealthbar();
-
-        StartCoroutine(MoveDown());
     }
 
-    private IEnumerator MoveDown()
+    private void MoveDown()
     {
-        while (IsAlive && GameManager.Instance.GameState == Enums.GameState.Playing)
+        Tile tile = GridController.Instance.GetTileOnCoord(_attachedTile.Coord.x + 1, _attachedTile.Coord.y);
+
+        if (tile == null)
         {
-            Tile tile = GridController.Instance.GetTileOnCoord(AttachedTile.Coord.x + 1, AttachedTile.Coord.y);
+            Debug.Log("Enemy target tile is null!");
 
-            if (tile == null)
+            if (_attachedTile.Coord.x == GridController.Instance.Tiles.GetLength(0) - 1)
             {
-                Debug.Log("Enemy target tile is null!");
-
-                if (AttachedTile.Coord.x == GridController.Instance.Tiles.GetLength(0) - 1)
-                {
-                    GameManager.Instance.OnGameEnd(false);
-                }
+                GameManager.Instance.OnGameEnd(false);
+            }
+        }
+        else
+        {
+            bool shouldMove = false;
+            if (tile.AttachedItem == null)
+            {
+                shouldMove = true;
             }
             else
             {
-                bool shouldMove = false;
-                if (tile.AttachedItem == null)
+                IDamagable killable = tile.AttachedItem.GetComponent<IDamagable>();
+                if (killable != null && killable is not Enemy)
                 {
+                    killable.TakeDamage(1);
+
                     shouldMove = true;
                 }
                 else
                 {
-                    IDamagable killable = tile.AttachedItem.GetComponent<IDamagable>();
-                    if (killable != null)
-                    {
-                        killable.TakeDamage(1);
-
-                        shouldMove = true;
-                    }
-                    else
-                    {
-                        Debug.Log("Enemy target tile is not empty!");
-                    }
+                    Debug.Log("Enemy target tile is not empty!");
                 }
+            }
 
-                if (shouldMove)
-                {
-                    AttachedTile = tile;
+            if (shouldMove)
+            {
+                _attachedTile?.RemoveItem();
+                _attachedTile = tile;
+                _attachedTile.AttachItem(this);
 
-                    yield return StartCoroutine(SetPositionByTile(_attachedTile, 1f / EnemyData.Speed));
-                }
+                SetPosition(_attachedTile, 1f / EnemyData.Speed);
             }
         }
     }
 
-    private IEnumerator SetPositionByTile(Tile tile, float duration = 0)
+    private void SetPosition(Tile tile, float duration = 0f)
     {
-        if (duration <= 0)
+        if (duration <= 0f)
         {
             transform.position = tile.transform.position;
         }
         else
         {
-            yield return transform.DOMove(tile.transform.position, duration).WaitForCompletion();
+            transform.DOMove(tile.transform.position, duration);
         }
     }
 
@@ -145,7 +121,10 @@ public class Enemy : PlacableItem, IDamagable
 
     public void Destroy()
     {
-        IsAlive = false;
+        _attachedTile?.RemoveItem();
+        _attachedTile = null;
+
+        transform.DOKill();
 
         EnemySpawner.Instance.OnEnemyKilled(this);
     }

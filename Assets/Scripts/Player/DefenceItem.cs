@@ -8,25 +8,25 @@ public class DefenceItem : PlacableItem, IDamagable
 
     [SerializeField] private Image _attackCountdownFillingImage;
 
-    private bool _isAlive;
+    private float _timer;
 
     private Tile _attachedTile;
-    public Tile AttachedTile
+
+    private void Update()
     {
-        get
+        if (_timer >= DefenceItemData.AttackInterval)
         {
-            return _attachedTile;
+            Shoot();
+
+            _timer = 0;
         }
-        private set
+
+        if (_attachedTile != null)
         {
-            AttachedTile?.RemoveItem();
-
-            _attachedTile = value;
-
-            _attachedTile.AttachItem(this);
-
-            SetPosition(_attachedTile.transform.position);
+            _timer += Time.deltaTime;
         }
+
+        _attackCountdownFillingImage.fillAmount = (DefenceItemData.AttackInterval - _timer) / DefenceItemData.AttackInterval;
     }
 
     public void Initialize(DefenceItemData data)
@@ -38,11 +38,10 @@ public class DefenceItem : PlacableItem, IDamagable
 
     public void AttachToTile(Tile tile)
     {
-        AttachedTile = tile;
+        _attachedTile = tile;
+        _attachedTile.AttachItem(this);
 
-        _isAlive = true;
-
-        StartCoroutine(ShootRoutine());
+        SetPosition(tile.transform.position);
     }
 
     public void SetPosition(Vector3 position)
@@ -50,51 +49,30 @@ public class DefenceItem : PlacableItem, IDamagable
         transform.position = position;
     }
 
-    private IEnumerator ShootRoutine()
+    private void Shoot()
     {
-        float attackTimer = 0;
-
-        while (_isAlive && GameManager.Instance.GameState == Enums.GameState.Playing)
+        switch (DefenceItemData.AttackDirection)
         {
-            attackTimer = 0;
+            case Enums.DefenceItemAttackDir.All:
 
-            while (attackTimer < DefenceItemData.AttackInterval)
-            {
-                attackTimer += Time.deltaTime;
+                for (int i = 0; i < 4; i++)
+                {
+                    TrySpawningOnCoord(_attachedTile.Coord.x, _attachedTile.Coord.y, new Vector2Int((int)Mathf.Cos(Mathf.Deg2Rad * (90f * i)), (int)Mathf.Sin(Mathf.Deg2Rad * (90f * i))));
+                }
 
-                _attackCountdownFillingImage.fillAmount = (DefenceItemData.AttackInterval - attackTimer) / DefenceItemData.AttackInterval;
+                break;
+            case Enums.DefenceItemAttackDir.Forward:
 
-                yield return new WaitForEndOfFrame();
-            }
+                TrySpawningOnCoord(_attachedTile.Coord.x, _attachedTile.Coord.y, new Vector2Int(-1, 0));
 
-            switch (DefenceItemData.AttackDirection)
-            {
-                case Enums.DefenceItemAttackDir.All:
-
-                    for (int i = 0; i < 4; i++)
-                    {
-                        TrySpawningOnCoord(AttachedTile.Coord.x, AttachedTile.Coord.y, new Vector2Int((int)Mathf.Cos(Mathf.Deg2Rad * (90f * i)), (int)Mathf.Sin(Mathf.Deg2Rad * (90f * i))));
-                    }
-
-                    break;
-                case Enums.DefenceItemAttackDir.Forward:
-
-                    TrySpawningOnCoord(AttachedTile.Coord.x, AttachedTile.Coord.y, new Vector2Int(-1, 0));
-
-                    break;
-                default:
-                    break;
-            }
+                break;
+            default:
+                break;
         }
     }
 
     private void TrySpawningOnCoord(int row, int column, Vector2Int direction)
     {
-        if (!_isAlive)
-        {
-            return;
-        }
-
         Tile tile = GridController.Instance.GetTileOnCoord(row, column);
 
         if (tile != null)
@@ -110,9 +88,12 @@ public class DefenceItem : PlacableItem, IDamagable
 
     public void Destroy()
     {
-        _isAlive = false;
+        _timer = 0f;
 
-        AttachedTile?.RemoveItem();
+        _attachedTile?.RemoveItem();
+        _attachedTile = null;
+
+        _attackCountdownFillingImage.fillAmount = 1f;
 
         DefenceItemPlaceController.Instance.OnItemKilled(this);
     }

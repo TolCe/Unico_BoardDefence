@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4426875966626364806}
   - component: {fileID: 6104121550017912054}
-  - component: {fileID: 1709377689750952572}
+  - component: {fileID: 2738972446698883028}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -48,8 +48,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   _healthFillingImage: {fileID: 3352420868905139738}
---- !u!136 &1709377689750952572
-CapsuleCollider:
+--- !u!65 &2738972446698883028
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -66,11 +66,9 @@ CapsuleCollider:
   m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.35
-  m_Height: 1.35
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.7, z: 0}
+  serializedVersion: 3
+  m_Size: {x: 1, y: 5, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2942912782338460996
 GameObject:
   m_ObjectHideFlags: 0
@@ -172,6 +170,7 @@ GameObject:
   - component: {fileID: 3062948231912091099}
   - component: {fileID: 3998556558559479518}
   - component: {fileID: 1379226625616720324}
+  - component: {fileID: 1307287045624087782}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -262,6 +261,18 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!225 &1307287045624087782
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3911158271396217720}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &4497536567980600577
 GameObject:
   m_ObjectHideFlags: 0

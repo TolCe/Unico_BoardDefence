@@ -12,7 +12,7 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
 
     [SerializeField] private DefenceItemsDatabase _itemsDatabase;
 
-    private List<DefenceItem> _spawnedDefenceItemsList;
+    private List<DefenceItem> _spawnedDefenceItemsList = new List<DefenceItem>();
 
     protected override void Awake()
     {
@@ -94,7 +94,7 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
         {
             foreach (DefenceItem item in _spawnedDefenceItemsList)
             {
-                _itemsPoolDictionary[item.DefenceItemData.Level].Return(item);
+                item.Destroy();
             }
 
             _spawnedDefenceItemsList = new List<DefenceItem>();

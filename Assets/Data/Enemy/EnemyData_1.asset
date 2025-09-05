@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: EnemyData_1
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   _level: 0
-  _health: 3
-  _speed: 1
   _prefab: {fileID: 6104121550017912054, guid: 22d10416256cc734b982824850eb5120, type: 3}
+  _health: 3
+  _speed: 0.5
