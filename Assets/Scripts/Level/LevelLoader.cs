@@ -8,9 +8,9 @@ public class LevelLoader : MonoBehaviour
     {
         LevelData data = JsonUtility.FromJson<LevelData>(levelFile.text);
 
-        GridController.Instance.CreateGrid(data.Rows, data.Columns);
+        EnemySpawner.Instance.SetEnemyData(data.EnemyDataList);
 
-        EnemySpawner.Instance.SpawnEnemies(data.EnemyDataList);
+        GridController.Instance.CreateGrid(data.Rows, data.Columns);
 
         DefenceItemsListing.Instance.ListUIElements(data.DefenceItemsDataList);
     }

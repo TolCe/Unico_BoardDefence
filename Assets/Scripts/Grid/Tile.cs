@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public bool IsEmpty { get; private set; }
+    public PlacableItem AttachedItem { get; private set; }
 
     public Vector2Int Coord { get; private set; }
 
@@ -19,14 +19,14 @@ public class Tile : MonoBehaviour
         RemoveItem();
     }
 
-    public void AttachItem()
+    public void AttachItem(PlacableItem placable)
     {
-        IsEmpty = false;
+        AttachedItem = placable;
     }
 
     public void RemoveItem()
     {
-        IsEmpty = true;
+        AttachedItem = null;
     }
 
     public void ShowDefault()
@@ -46,6 +46,6 @@ public class Tile : MonoBehaviour
 
     public bool CheckSnapAvailability()
     {
-        return Coord.x >= GridController.Instance.Tiles.GetLength(0) * 0.5f && IsEmpty;
+        return Coord.x >= GridController.Instance.Tiles.GetLength(0) * 0.5f && AttachedItem == null;
     }
 }

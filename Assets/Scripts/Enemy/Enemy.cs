@@ -1,12 +1,28 @@
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : PlacableItem, IKillable
 {
     [SerializeField] private Vector2Int _gridPosition;
 
-    private EnemyData _enemyData;
+    public EnemyData EnemyData { get; private set; }
 
     private float _timer;
+
+    private bool _isAlive;
+    public bool IsAlive
+    {
+        get
+        {
+            return _isAlive;
+        }
+
+        private set
+        {
+            _isAlive = value;
+
+            AttachedTile?.RemoveItem();
+        }
+    }
 
     private Tile _attachedTile;
     public Tile AttachedTile
@@ -21,7 +37,7 @@ public class Enemy : MonoBehaviour
 
             _attachedTile = value;
 
-            _attachedTile.AttachItem();
+            _attachedTile.AttachItem(this);
 
             SetPositionByTile(_attachedTile);
         }
@@ -29,10 +45,10 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
-        if (gameObject.activeSelf)
+        if (IsAlive && GameManager.Instance.GameState == Enums.GameState.Playing)
         {
             _timer += Time.deltaTime;
-            if (_timer >= 1f / _enemyData.Speed)
+            if (_timer >= 1f / EnemyData.Speed)
             {
                 _timer = 0f;
                 MoveDown();
@@ -42,9 +58,11 @@ public class Enemy : MonoBehaviour
 
     public void SpawnEnemy(EnemyData data, Tile tile)
     {
-        _enemyData = data;
+        EnemyData = data;
 
         _timer = 0;
+
+        IsAlive = true;
 
         gameObject.SetActive(true);
 
@@ -58,16 +76,39 @@ public class Enemy : MonoBehaviour
         if (tile == null)
         {
             Debug.Log("Enemy target tile is null!");
+
+            if (AttachedTile.Coord.x == GridController.Instance.Tiles.GetLength(0) - 1)
+            {
+                Debug.Log("GAME OVER!");
+
+                GameManager.Instance.OnGameEnd(false);
+            }
         }
         else
         {
-            if (tile.IsEmpty)
+            bool shouldMove = false;
+            if (tile.AttachedItem == null)
             {
-                AttachedTile = tile;
+                shouldMove = true;
             }
             else
             {
-                Debug.Log("Enemy target tile is not empty!");
+                IKillable killable = tile.AttachedItem.GetComponent<IKillable>();
+                if (killable != null)
+                {
+                    killable.Kill();
+
+                    shouldMove = true;
+                }
+                else
+                {
+                    Debug.Log("Enemy target tile is not empty!");
+                }
+            }
+
+            if (shouldMove)
+            {
+                AttachedTile = tile;
             }
         }
     }
@@ -75,5 +116,12 @@ public class Enemy : MonoBehaviour
     private void SetPositionByTile(Tile tile)
     {
         transform.position = tile.transform.position + Vector3.up;
+    }
+
+    public void Kill()
+    {
+        IsAlive = false;
+
+        EnemySpawner.Instance.OnEnemyKilled(this);
     }
 }

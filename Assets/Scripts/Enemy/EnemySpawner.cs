@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,38 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
 
     private Dictionary<int, ObjectPool<Enemy>> _enemyPoolDictionary;
 
+    private Coroutine _enemySpawnCoroutine;
+
+    private List<LevelEnemyData> _levelEnemyDataList;
+
+    private List<Enemy> _spawnedEnemiesList;
+
+    private void Start()
+    {
+        GameManager.Instance.OnGameStateChange += OnGameStateChange;
+    }
+
+    public void SetEnemyData(List<LevelEnemyData> levelEnemyDataList)
+    {
+        _levelEnemyDataList = levelEnemyDataList;
+    }
+
+    private void OnGameStateChange()
+    {
+        if (GameManager.Instance.GameState == Enums.GameState.Playing)
+        {
+            SpawnEnemies(_levelEnemyDataList);
+        }
+        else
+        {
+            if (_enemySpawnCoroutine != null)
+            {
+                StopCoroutine(_enemySpawnCoroutine);
+                _enemySpawnCoroutine = null;
+            }
+        }
+    }
+
     public void SpawnEnemies(List<LevelEnemyData> enemyDataList)
     {
         if (_enemyPoolDictionary == null)
@@ -19,7 +52,12 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
             CreatePools();
         }
 
-        StartCoroutine(SpawnCoroutine(enemyDataList));
+        if (_spawnedEnemiesList == null)
+        {
+            _spawnedEnemiesList = new List<Enemy>();
+        }
+
+        _enemySpawnCoroutine = StartCoroutine(SpawnCoroutine(enemyDataList));
     }
 
     private IEnumerator SpawnCoroutine(List<LevelEnemyData> enemyDataList)
@@ -32,6 +70,8 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
             {
                 Enemy enemy = _enemyPoolDictionary[selectedEnemyData.Level].Get();
                 enemy.SpawnEnemy(selectedEnemyData, GetRandomTileFromFirstRow());
+
+                _spawnedEnemiesList.Add(enemy);
 
                 yield return new WaitForSeconds(_enemySpawnInterval);
             }
@@ -60,5 +100,12 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
 
             _enemyPoolDictionary.Add(data.Level, pool);
         }
+    }
+
+    public void OnEnemyKilled(Enemy enemy)
+    {
+        _spawnedEnemiesList.Remove(enemy);
+
+        _enemyPoolDictionary[enemy.EnemyData.Level].Return(enemy);
     }
 }

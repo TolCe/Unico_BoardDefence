@@ -56,8 +56,9 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
 
         if (selectedTile != null && selectedTile.CheckSnapAvailability())
         {
-            item.SetPosition(selectedTile.transform.position + Vector3.up);
-            selectedTile.AttachItem();
+            GameManager.Instance.StartPlaying();
+
+            item.AttachToTile(selectedTile);
         }
         else
         {
@@ -75,7 +76,7 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
 
             if (_itemsPoolDictionary.ContainsKey(data.Level))
             {
-                Debug.LogWarning("There are more than one defence item data with same level!");
+                Debug.Log("There are more than one defence item data with same level!");
 
                 continue;
             }
@@ -101,8 +102,6 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
             Tile tile = hit.collider.GetComponent<Tile>();
             if (tile != null)
             {
-                Debug.Log($"Hit tile at {tile.Coord}");
-
                 if (tile.CheckSnapAvailability())
                 {
                     tile.ShowAvailable();
@@ -117,5 +116,10 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
         }
 
         return null;
+    }
+
+    public void OnItemKilled(DefenceItem item)
+    {
+        _itemsPoolDictionary[item.DefenceItemData.Level].Return(item);
     }
 }

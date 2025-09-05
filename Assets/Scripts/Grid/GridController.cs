@@ -67,6 +67,11 @@ public class GridController : SingletonMonoBehaviour<GridController>
 
     public Tile GetTileOnCoord(int row, int column)
     {
+        if (row < 0 || column < 0)
+        {
+            return null;
+        }
+
         if (row >= Tiles.GetLength(0) || column >= Tiles.GetLength(1))
         {
             return null;
@@ -80,7 +85,7 @@ public class GridController : SingletonMonoBehaviour<GridController>
         List<Tile> emptyTilesList = new List<Tile>();
         for (int i = 0; i < Tiles.GetLength(1); i++)
         {
-            if (Tiles[0, i].IsEmpty)
+            if (Tiles[0, i].AttachedItem == null)
             {
                 emptyTilesList.Add(Tiles[0, i]);
             }
