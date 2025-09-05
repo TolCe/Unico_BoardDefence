@@ -107,5 +107,10 @@ public class EnemySpawner : SingletonMonoBehaviour<EnemySpawner>
         _spawnedEnemiesList.Remove(enemy);
 
         _enemyPoolDictionary[enemy.EnemyData.Level].Return(enemy);
+
+        if (_spawnedEnemiesList.Count <= 0)
+        {
+            GameManager.Instance.OnGameEnd(true);
+        }
     }
 }

@@ -1,9 +1,12 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class DefenceItem : PlacableItem, IKillable
+public class DefenceItem : PlacableItem, IDamagable
 {
     public DefenceItemData DefenceItemData { get; private set; }
+
+    [SerializeField] private Image _attackCountdownFillingImage;
 
     private bool _isAlive;
     public bool IsAlive
@@ -63,9 +66,20 @@ public class DefenceItem : PlacableItem, IKillable
 
     private IEnumerator ShootRoutine()
     {
+        float attackTimer = 0;
+
         while (IsAlive && GameManager.Instance.GameState == Enums.GameState.Playing)
         {
-            yield return new WaitForSeconds(DefenceItemData.AttackInterval);
+            attackTimer = 0;
+
+            while (attackTimer < DefenceItemData.AttackInterval)
+            {
+                attackTimer += Time.deltaTime;
+
+                _attackCountdownFillingImage.fillAmount = (DefenceItemData.AttackInterval - attackTimer) / DefenceItemData.AttackInterval;
+
+                yield return new WaitForEndOfFrame();
+            }
 
             switch (DefenceItemData.AttackDirection)
             {
@@ -73,7 +87,7 @@ public class DefenceItem : PlacableItem, IKillable
 
                     for (int i = 0; i < 4; i++)
                     {
-                        TrySpawningOnCoord(AttachedTile.Coord.x + (int)Mathf.Cos(Mathf.Deg2Rad * (90f * i)), AttachedTile.Coord.y + (int)Mathf.Sin(Mathf.Deg2Rad * (90f * i)), new Vector2Int((int)Mathf.Cos(Mathf.Deg2Rad * (90f * i)), (int)Mathf.Sin(Mathf.Deg2Rad * (90f * i))));
+                        TrySpawningOnCoord(AttachedTile.Coord.x, AttachedTile.Coord.y, new Vector2Int((int)Mathf.Cos(Mathf.Deg2Rad * (90f * i)), (int)Mathf.Sin(Mathf.Deg2Rad * (90f * i))));
                     }
 
                     break;
@@ -98,7 +112,12 @@ public class DefenceItem : PlacableItem, IKillable
         }
     }
 
-    public void Kill()
+    public void TakeDamage(float damage)
+    {
+        Destroy();
+    }
+
+    public void Destroy()
     {
         IsAlive = false;
 

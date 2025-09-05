@@ -8,14 +8,12 @@ public class GameManager : Singleton<GameManager>
 
     public void StartPlaying()
     {
-        if (GameState == Enums.GameState.Playing)
+        if (GameState == Enums.GameState.Start)
         {
-            return;
+            GameState = Enums.GameState.Playing;
+
+            OnGameStateChange?.Invoke();
         }
-
-        GameState = Enums.GameState.Playing;
-
-        OnGameStateChange?.Invoke();
     }
 
     public void OnGameEnd(bool success)

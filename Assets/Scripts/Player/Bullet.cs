@@ -8,6 +8,8 @@ public class Bullet : PlacableItem
 
     private int _tilesMoved;
 
+    public bool Active { get; private set; }
+
     private Tile _attachedTile;
     public Tile AttachedTile
     {
@@ -17,11 +19,7 @@ public class Bullet : PlacableItem
         }
         private set
         {
-            AttachedTile?.RemoveItem();
-
             _attachedTile = value;
-
-            _attachedTile.AttachItem(this);
 
             SetPosition(_attachedTile.transform.position + Vector3.up);
         }
@@ -37,6 +35,8 @@ public class Bullet : PlacableItem
 
         gameObject.SetActive(true);
 
+        ToggleActive(true);
+
         StartCoroutine(MoveRoutine(direction));
     }
 
@@ -47,11 +47,11 @@ public class Bullet : PlacableItem
 
     private IEnumerator MoveRoutine(Vector2Int direction)
     {
-        while (gameObject.activeSelf && _tilesMoved < DefenceItemData.Range)
+        while (Active && _tilesMoved < DefenceItemData.Range)
         {
-            yield return new WaitForSeconds(0.5f);
-
             MoveInDirection(direction);
+
+            yield return new WaitForSeconds(0.2f);
         }
 
         BulletController.Instance.OnBulletDone(this);
@@ -74,10 +74,10 @@ public class Bullet : PlacableItem
             }
             else
             {
-                IKillable killable = tile.AttachedItem.GetComponent<IKillable>();
+                IDamagable killable = tile.AttachedItem.GetComponent<IDamagable>();
                 if (killable != null)
                 {
-                    killable.Kill();
+                    killable.TakeDamage(DefenceItemData.Damage);
 
                     shouldMove = true;
                 }
@@ -94,5 +94,10 @@ public class Bullet : PlacableItem
                 _tilesMoved++;
             }
         }
+    }
+
+    public void ToggleActive(bool active)
+    {
+        Active = active;
     }
 }

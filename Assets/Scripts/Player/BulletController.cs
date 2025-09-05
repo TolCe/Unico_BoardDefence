@@ -25,6 +25,8 @@ public class BulletController : SingletonMonoBehaviour<BulletController>
 
     public void OnBulletDone(Bullet bullet)
     {
+        bullet.ToggleActive(false);
+
         _bulletPool.Return(bullet);
     }
 }

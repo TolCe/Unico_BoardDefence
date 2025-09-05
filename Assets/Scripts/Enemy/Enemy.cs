@@ -1,12 +1,15 @@
 using UnityEngine;
+using UnityEngine.UI;
 
-public class Enemy : PlacableItem, IKillable
+public class Enemy : PlacableItem, IDamagable
 {
-    [SerializeField] private Vector2Int _gridPosition;
-
     public EnemyData EnemyData { get; private set; }
 
     private float _timer;
+
+    [SerializeField] private Image _healthFillingImage;
+
+    public float CurrentHealth { get; private set; }
 
     private bool _isAlive;
     public bool IsAlive
@@ -64,6 +67,8 @@ public class Enemy : PlacableItem, IKillable
 
         IsAlive = true;
 
+        CurrentHealth = EnemyData.Health;
+
         gameObject.SetActive(true);
 
         AttachedTile = tile;
@@ -93,10 +98,10 @@ public class Enemy : PlacableItem, IKillable
             }
             else
             {
-                IKillable killable = tile.AttachedItem.GetComponent<IKillable>();
+                IDamagable killable = tile.AttachedItem.GetComponent<IDamagable>();
                 if (killable != null)
                 {
-                    killable.Kill();
+                    killable.TakeDamage(1);
 
                     shouldMove = true;
                 }
@@ -115,10 +120,22 @@ public class Enemy : PlacableItem, IKillable
 
     private void SetPositionByTile(Tile tile)
     {
-        transform.position = tile.transform.position + Vector3.up;
+        transform.position = tile.transform.position;
     }
 
-    public void Kill()
+    public void TakeDamage(float damage)
+    {
+        CurrentHealth -= damage;
+
+        _healthFillingImage.fillAmount = CurrentHealth / EnemyData.Health;
+
+        if (CurrentHealth <= 0)
+        {
+            Destroy();
+        }
+    }
+
+    public void Destroy()
     {
         IsAlive = false;
 
