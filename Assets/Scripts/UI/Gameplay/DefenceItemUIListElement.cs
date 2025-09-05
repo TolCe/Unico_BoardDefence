@@ -4,11 +4,13 @@ using UnityEngine.EventSystems;
 
 public class DefenceItemUIListElement : MonoBehaviour
 {
-    public DefenceItemData DefenceItemData { get; private set; }
+    public LevelDefenceItemData DefenceItemData { get; private set; }
 
     [SerializeField] private EventTrigger _eventTrigger;
 
     [SerializeField] private TMP_Text _levelText;
+
+    public int CurrentCount { get; private set; }
 
     private void Start()
     {
@@ -20,20 +22,46 @@ public class DefenceItemUIListElement : MonoBehaviour
 
     private void OnPointerDown()
     {
-        DefenceItemPlaceController.Instance.OnSelectedForPlacing(DefenceItemData);
+        DefenceItemPlaceController.Instance.OnSelectedForPlacing(this, DefenceItemData);
+
+        DecreaseCount();
     }
 
-    public void Initialize(DefenceItemData defenceItemData)
+    public void Initialize(LevelDefenceItemData defenceItemData)
     {
         DefenceItemData = defenceItemData;
 
-        WriteLevel();
+        CurrentCount = defenceItemData.Count;
+
+        WriteAmount();
 
         gameObject.SetActive(true);
     }
 
-    private void WriteLevel()
+    private void WriteAmount()
     {
-        _levelText.text = $"{DefenceItemData.Level}";
+        _levelText.text = $"{CurrentCount}";
+    }
+
+    private void DecreaseCount()
+    {
+        CurrentCount--;
+
+        WriteAmount();
+    }
+
+    public void OnPlaced()
+    {
+        if (CurrentCount <= 0)
+        {
+            DefenceItemsListing.Instance.ReturnToPool(this);
+        }
+    }
+
+    public void OnReturn()
+    {
+        CurrentCount++;
+
+        WriteAmount();
     }
 }

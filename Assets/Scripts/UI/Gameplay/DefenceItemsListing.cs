@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class DefenceItemsListing : SingletonMonoBehaviour<DefenceItemsListing>
 {
@@ -24,12 +21,17 @@ public class DefenceItemsListing : SingletonMonoBehaviour<DefenceItemsListing>
         for (int i = 0; i < itemsDataList.Count; i++)
         {
             DefenceItemUIListElement element = _itemsPool.Get();
-            element.Initialize(_itemsDatabase.ItemDataList.Find(x => x.Level == itemsDataList[i].Level));
+            element.Initialize(itemsDataList[i]);
         }
     }
 
     private void CreatePool()
     {
         _itemsPool = new ObjectPool<DefenceItemUIListElement>(_itemUIElementPrefab, 10, _listingContainer);
+    }
+
+    public void ReturnToPool(DefenceItemUIListElement element)
+    {
+        _itemsPool.Return(element);
     }
 }

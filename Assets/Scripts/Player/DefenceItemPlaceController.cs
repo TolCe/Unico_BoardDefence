@@ -11,21 +11,23 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
 
     [SerializeField] private DefenceItemsDatabase _itemsDatabase;
 
-    public void OnSelectedForPlacing(DefenceItemData data)
+    public void OnSelectedForPlacing(DefenceItemUIListElement uiItem, LevelDefenceItemData data)
     {
         if (_itemsPoolDictionary == null)
         {
             CreatePools();
         }
 
-        DefenceItem item = _itemsPoolDictionary[data.Level].Get();
+        DefenceItemData itemData = _itemsDatabase.ItemDataList.Find(x => x.Level == data.Level);
 
-        item.Initialize(data);
+        DefenceItem item = _itemsPoolDictionary[itemData.Level].Get();
 
-        StartCoroutine(FollowWhileInput(item));
+        item.Initialize(itemData);
+
+        StartCoroutine(FollowWhileInput(uiItem, item));
     }
 
-    private IEnumerator FollowWhileInput(DefenceItem item)
+    private IEnumerator FollowWhileInput(DefenceItemUIListElement uiItem, DefenceItem item)
     {
         Tile selectedTile = null;
 
@@ -59,10 +61,14 @@ public class DefenceItemPlaceController : SingletonMonoBehaviour<DefenceItemPlac
             GameManager.Instance.StartPlaying();
 
             item.AttachToTile(selectedTile);
+
+            uiItem.OnPlaced();
         }
         else
         {
             _itemsPoolDictionary[item.DefenceItemData.Level].Return(item);
+
+            uiItem.OnReturn();
         }
     }
 
